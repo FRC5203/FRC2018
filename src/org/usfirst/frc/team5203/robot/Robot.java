@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
+
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
@@ -47,15 +50,16 @@ public class Robot extends SampleRobot {
 	CANTalon rearLeft = new CANTalon(2);
 	CANTalon frontRight = new CANTalon(3);
 	CANTalon rearRight = new CANTalon(4);
+	ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 	
 	//Encoder objects
-	Encoder encoderBackLeft = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
-	Encoder encoderBackRight = new Encoder(0,1,false,Encoder.EncodingType.k4X);
 	Encoder encoderFrontLeft = new Encoder(0,1,false,Encoder.EncodingType.k4X);
 	Encoder encoderFrontRight = new Encoder(0,1,false,Encoder.EncodingType.k4X);
 	
-	//Distance per pulse for the old test encoder, get rid of later
-	double kOldDistPerPulse = 0.01022495;
+	//Distance per pulse for the encoder
+	//For reference, the encoder being used for 2018 have 256 pulses per revolution
+	//Units used are inches
+	double kDistPerPulse = 0.0751650586;
 	
 	//Variables for encoder
 	//count gets pulses
@@ -147,27 +151,17 @@ public class Robot extends SampleRobot {
 		// this autonomous mode.
 		robotDrive.setSafetyEnabled(false);
 		
-		//Encoder parameters for back left encoder
-		encoderBackLeft.setMaxPeriod(.1);
-		encoderBackLeft.setMinRate(10);
-		//In inches
-		encoderBackLeft.setDistancePerPulse(kOldDistPerPulse);
-		encoderBackLeft.setReverseDirection(false);
-		encoderBackLeft.setSamplesToAverage(7);
+		//Resets gyro on autonomous
+		gyro.reset();
 		
-		//Encoder parameters for back right encoder
-		encoderBackRight.setMaxPeriod(.1);
-		encoderBackRight.setMinRate(10);
-		//In inches
-		encoderBackRight.setDistancePerPulse(kOldDistPerPulse);
-		encoderBackRight.setReverseDirection(false);
-		encoderBackRight.setSamplesToAverage(7);
+		//Display Gyro vvariable thingy
+		SmartDashboard.putNumber("Gyro",gyro.getAngle());
 		
 		//Encoder parameters for front left encoder
 		encoderFrontLeft.setMaxPeriod(.1);
 		encoderFrontLeft.setMinRate(10);
 		//In inches
-		encoderFrontLeft.setDistancePerPulse(kOldDistPerPulse);
+		encoderFrontLeft.setDistancePerPulse(kDistPerPulse);
 		encoderFrontLeft.setReverseDirection(false);
 		encoderFrontLeft.setSamplesToAverage(7);
 		
@@ -175,13 +169,27 @@ public class Robot extends SampleRobot {
 		encoderFrontRight.setMaxPeriod(.1);
 		encoderFrontRight.setMinRate(10);
 		//In inches
-		encoderFrontRight.setDistancePerPulse(kOldDistPerPulse);
+		encoderFrontRight.setDistancePerPulse(kDistPerPulse);
 		encoderFrontRight.setReverseDirection(false);
 		encoderFrontRight.setSamplesToAverage(7);
 		
+		//Random Autos made to test encoders and gyro
 		switch (autoSelected) {
+			case kDefaultAuto:
+				autoDrive(10);
+				robotDrive.arcadeDrive(0,0);
+				break;
 			case kCustomAuto:
-			
+				autoTurn(90);
+				robotDrive.arcadeDrive(0,0);
+				Timer.delay(5);
+				break;
+			case kCustomAuto2:
+				autoDrive(10);
+				autoTurn(-90);
+				autoDrive(5);
+				robotDrive.arcadeDrive(0,0);
+				break;
 				
 		}
 	}
@@ -253,38 +261,27 @@ public class Robot extends SampleRobot {
 			stoppedLeft = encoderFrontLeft.getStopped();
 			Timer.delay(0.005);
 		}
+		robotDrive.arcadeDrive(0,0);
 		
 	}
-
-	public void leftTurn() {
+	//the turn function allows you to input any angle for turning, this way you can easily turn any angle you want, without multiple functions
+	public void autoTurn(double angle) {
 		
 		//Resets encoder after running autoDrive
-		encoderFrontLeft.reset();
-		encoderFrontRight.reset();
+		//encoderFrontLeft.reset();
+		//encoderFrontRight.reset();
 		encoderDistanceLeft = 0;
 		encoderDistanceRight = 0;
 		//While for turning is a work in progress
 		
-		/*
-		while(distance > encoderDistanceLeft && distance > encoderDistanceRight) {
-			robotDrive.arcadeDrive(0,-1);
-			
-			//Variables for front left encoder
-			countLeft = encoderFrontLeft.get();
-			encoderDistanceLeft = encoderFrontLeft.getDistance();
-			rateLeft = encoderFrontLeft.getRate();
-			directionLeft = encoderFrontLeft.getDirection();
-			stoppedLeft = encoderFrontLeft.getStopped();
-			
-			//Variables for front right encoder
-			countRight = encoderFrontRight.get();
-			encoderDistanceRight = encoderFrontRight.getDistance();
-			rateRight = encoderFrontRight.getRate();
-			directionRight = encoderFrontRight.getDirection();
-			stoppedRight = encoderFrontRight.getStopped();
+		
+		
+		while(angle > -gyro.getAngle()) {	
+			robotDrive.arcadeDrive(0,-0.5);
+			SmartDashboard.putNumber("Gyro",-gyro.getAngle());
 			Timer.delay(0.005);
 		}
-		*/
+		robotDrive.arcadeDrive(0,0);
 		
 	}
 }
