@@ -13,9 +13,8 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
-
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
@@ -85,9 +84,18 @@ public class Robot extends SampleRobot {
 	private static final String kDefaultAuto = "Default";
 	private static final String kCustomAuto = "My Auto";
 	private static final String kCustomAuto2 = "My Second Auto";
-
-
+	
+	//Alliance color variable
+	DriverStation.Alliance color;
+	//Robot position-on-field variable
+	int station;
+	//String telling the robot the locations of the switches
+	String gameData;
+	
+	
+	//Game controller 
 	private Joystick m_stick = new Joystick(0);
+	
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
 
 	public Robot() {
@@ -138,9 +146,32 @@ public class Robot extends SampleRobot {
 	 *     }
 	 * }
 	 * }</pre></blockquote>
+	 * @param  
 	 */
+	/*	public void disabled() {
+		station = 0;
+		color = null;
+		gameData = null;
+		while(station == 0 || color == null || gameData.length() > 0) {
+			//Gets the alliance color for the round
+			color = DriverStation.getInstance().getAlliance();
+			//Gets position that the robot is in (1-3)
+			station = DriverStation.getInstance().getLocation();
+			//Gets locations of switches on the field
+			gameData = DriverStation.getInstance().getGameSpecificMessage();
+			}
+	}
+*/
 	@Override
 	public void autonomous() {
+		
+		//Gets the alliance color for the round
+		color = DriverStation.getInstance().getAlliance();
+		//Gets position that the robot is in (1-3)
+		station = DriverStation.getInstance().getLocation();
+		//Gets locations of switches on the field
+		gameData = DriverStation.getInstance().getGameSpecificMessage();
+		
 		String autoSelected = m_chooser.getSelected();
 		// String autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
@@ -180,9 +211,55 @@ public class Robot extends SampleRobot {
 				robotDrive.arcadeDrive(0,0);
 				break;
 			case kCustomAuto:
-				autoTurn(90);
-				robotDrive.arcadeDrive(0,0);
-				Timer.delay(5);
+				if(color == DriverStation.Alliance.Blue && station == 1) {
+					if(gameData.charAt(0) == 'R') {
+						autoDrive(238);
+						autoTurn(90);
+						autoDrive(40);
+						//drop cube in plate
+						autoDrive(-35);
+						autoTurn(-90);
+						//autoDrive(unknown);
+						//autoTurn(unknown);
+					}
+					else if(gameData.charAt(0) == 'L') {
+						autoDrive(238);
+						autoTurn(90);
+						autoDrive(40);
+						//Drop cube in plate
+						autoDrive(-35);
+						autoTurn(-90);
+						//autoDrive(unknown);
+						//autoTurn(unknown);
+					}
+					else {
+						robotDrive.arcadeDrive(0,0);			
+					}
+				
+				}
+				if(color == DriverStation.Alliance.Blue && station == 2) {
+					if(gameData.charAt(0) == 'R') {
+						//autoDrive(unknown);
+					}
+					else if(gameData.charAt(0) == 'L') {
+						//autoDrive(unknown);
+					}
+					else {
+						robotDrive.arcadeDrive(0,0);
+					}
+				}
+				if(color == DriverStation.Alliance.Blue && station == 3) {
+					if(gameData.charAt(0) == 'R') {
+						//autoDrive(unknown);
+					}
+					else if(gameData.charAt(0) == 'L') {
+						//autoDrive(unknown);
+					}
+					else {
+						robotDrive.arcadeDrive(0,0);
+					}
+				}
+					
 				break;
 			case kCustomAuto2:
 				autoDrive(10);
@@ -249,10 +326,13 @@ public class Robot extends SampleRobot {
 		encoderFrontLeft.reset();
 		encoderFrontRight.reset();
 		encoderDistanceLeft = 0;
-		
+		double speed = 0.6;
 		while(distance > encoderDistanceLeft) {
-			//Drive robot forward
-			robotDrive.arcadeDrive(1,0);
+			//tests if the robot is within 2 feet of target distance. If so, the robot slows down to make sure it doesn't overshoot the target distance
+			if(distance - encoderDistanceLeft <= 24){
+				speed = 0.3;
+			}
+			robotDrive.arcadeDrive(speed,0);
 			//Variables for front left encoder
 			countLeft = encoderFrontLeft.get();
 			encoderDistanceLeft = encoderFrontLeft.getDistance();
@@ -272,16 +352,34 @@ public class Robot extends SampleRobot {
 		//encoderFrontRight.reset();
 		encoderDistanceLeft = 0;
 		encoderDistanceRight = 0;
-		//While for turning is a work in progress
-		
-		
-		
+		double turn = -0.5;
 		while(angle > -gyro.getAngle()) {	
-			robotDrive.arcadeDrive(0,-0.5);
+			//tests if the angle left for the robot to turn is within 20 degress. If so, it slows the robot
+			if(angle - gyro.getAngle() <= 20) {
+				turn = -0.2;
+			}
+			robotDrive.arcadeDrive(0,turn);
 			SmartDashboard.putNumber("Gyro",-gyro.getAngle());
 			Timer.delay(0.005);
 		}
 		robotDrive.arcadeDrive(0,0);
 		
+	}
+	public void test() {
+		robotDrive.setSafetyEnabled(false);
+		gyro.reset();
+		SmartDashboard.putNumber("Gyro",gyro.getAngle());
+		encoderFrontLeft.setMaxPeriod(.1);
+		encoderFrontLeft.setMinRate(10);
+		encoderFrontLeft.setDistancePerPulse(kDistPerPulse);
+		encoderFrontLeft.setReverseDirection(false);
+		encoderFrontLeft.setSamplesToAverage(7);
+		encoderFrontRight.setMaxPeriod(.1);
+		encoderFrontRight.setMinRate(10);
+		encoderFrontRight.setDistancePerPulse(kDistPerPulse);
+		encoderFrontRight.setReverseDirection(false);
+		encoderFrontRight.setSamplesToAverage(7);
+		
+		//Robot test code goes here:
 	}
 }
