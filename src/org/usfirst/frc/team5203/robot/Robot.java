@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
@@ -48,11 +49,13 @@ public class Robot extends SampleRobot {
 	WPI_TalonSRX rearLeft = new WPI_TalonSRX(2);
 	WPI_TalonSRX frontRight = new WPI_TalonSRX(3);
 	WPI_TalonSRX rearRight = new WPI_TalonSRX(4);
-	//Gyro used for giving direction of the robot, useful for autonomous
-	//ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+	//WPI_TalonSRX cubeManipulator = new WPI_TalonSRX(5);
+	//Spark climber = new Spark(Channel number here)
+	//Gyro used for giving direction of the robot, useful for things like turning in autonomous
+	ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 	
 	//Encoder objects
-	Encoder encoderFrontLeft = new Encoder(0,1,false,Encoder.EncodingType.k2X);
+	Encoder encoderFrontLeft = new Encoder(0,1,false,Encoder.EncodingType.k4X);
 	//Encoder encoderFrontRight = new Encoder(0,1,false,Encoder.EncodingType.k4X);
 	 
 	//Distance per pulse for the encoder
@@ -102,6 +105,7 @@ public class Robot extends SampleRobot {
 
 	@Override
 	public void robotInit() {
+		CameraServer.getInstance().startAutomaticCapture();
 		m_chooser.addDefault("Default Robot Auto", kDefaultAuto);
 		m_chooser.addObject("My Robot Auto", kCustomAuto);
 		m_chooser.addObject("My Second Robot Auto", kCustomAuto2);
@@ -180,18 +184,18 @@ public class Robot extends SampleRobot {
 		robotDrive.setSafetyEnabled(false);
 		
 		//Resets gyro on autonomous
-		//gyro.reset();
+		gyro.reset();
 		
 		//Display Gyro vvariable thingy
-		//SmartDashboard.putNumber("Gyro",gyro.getAngle());
+		SmartDashboard.putNumber("Gyro",gyro.getAngle());
 		
 		//Encoder parameters for front left encoder
 		encoderFrontLeft.setMaxPeriod(.1);
 		encoderFrontLeft.setMinRate(10);
 		//In inches
-		encoderFrontLeft.setDistancePerPulse(kDistPerPulse);
+		encoderFrontLeft.setDistancePerPulse(0.00390625);
 		encoderFrontLeft.setReverseDirection(false);
-		encoderFrontLeft.setSamplesToAverage(20);
+		encoderFrontLeft.setSamplesToAverage(10);
 		
 		//Encoder parameters for front right encoder
 	//	encoderFrontRight.setMaxPeriod(.1);
@@ -205,8 +209,7 @@ public class Robot extends SampleRobot {
 		System.out.println("2Auto selected: " + autoSelected);
 		switch (autoSelected) {
 			case kDefaultAuto:
-				autoDrive(10);
-				robotDrive.arcadeDrive(0,0);
+				autoDrive(5);
 				break;
 			case kCustomAuto:
 				if(color == DriverStation.Alliance.Blue && station == 1) {
@@ -261,23 +264,45 @@ public class Robot extends SampleRobot {
 				break;
 			case kCustomAuto2:
 				System.out.println("In CA2");
+				double speed = 0.05;
 				encoderFrontLeft.reset();
 				SmartDashboard.putNumber("Testliness", 330);
-				while(-encoderFrontLeft.get() < 1280) {
+				while(-encoderFrontLeft.get() < 1792) {
 					encoderFrontLeft.get();
 					SmartDashboard.putNumber("EncPulses", -encoderFrontLeft.get());
-					frontLeft.set(0.05);
-					frontRight.set(0.05);
-					rearLeft.set(0.05);
-					rearRight.set(0.05);
+					frontLeft.set(speed);
+					frontRight.set(speed);
+					rearLeft.set(speed);
+					rearRight.set(speed);
 					
+					}
+				speed = -0.05;
+				encoderFrontLeft.reset();
+				while(-encoderFrontLeft.get() > -512) {
+					encoderFrontLeft.get();
+					SmartDashboard.putNumber("EncPulses", -encoderFrontLeft.get());
+					frontLeft.set(speed);
+					frontRight.set(speed);
+					rearLeft.set(speed);
+					rearRight.set(speed);
 				}
-				frontLeft.setNuetralMode();
-				frontRight.setNuetralMode();
-				rearLeft.setNuetralMode();
-				rearRight.setNuetralMode();
+				Timer.delay(2);
+				speed = 0.05;
+				encoderFrontLeft.reset();
+				while(-encoderFrontLeft.get() < 1024) {
+					encoderFrontLeft.get();
+					SmartDashboard.putNumber("EncPulses",  -encoderFrontLeft.get());
+					frontLeft.set(speed);
+					frontRight.set(speed);
+					rearLeft.set(speed);
+					rearRight.set(speed);
+					}
+				speed = 0;
+				frontLeft.set(speed);
+				frontRight.set(speed);
+				rearLeft.set(speed);
+				rearRight.set(speed);
 				break;
-				
 		}
 	}
 
@@ -371,7 +396,7 @@ public class Robot extends SampleRobot {
 		
 	}
 	//the turn function allows you to input any angle for turning, this way you can easily turn any angle you want, without multiple functions
-	/*public void autoTurn(double angle) {
+	public void autoTurn(double angle) {
 		
 		//Resets encoder after running autoDrive
 		encoderFrontLeft.reset();
@@ -390,7 +415,7 @@ public class Robot extends SampleRobot {
 		}
 		robotDrive.arcadeDrive(0,0);
 		
-	} */
+	} 
 	/*public void test() {
 		robotDrive.setSafetyEnabled(false);
 		gyro.reset();
