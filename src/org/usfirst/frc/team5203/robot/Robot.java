@@ -330,33 +330,17 @@ public class Robot extends SampleRobot {
 			*The second double in Math.pow needs to be odd or the robot will not drive properly
 			*/
 			
-			
+			//Every time the stick is in neutral position, it resets the motors to zero.
 			robotDrive.arcadeDrive(-Math.pow(m_stick.getY(),3), Math.pow(m_stick.getX(),3));
 			//Uses buttons "A" and "B" to test basic electrical setup on spark controllers
 			if(m_stick.getRawButton(1)) {
-				frontLeft.set(0.1);
-				frontRight.set(0.1);
-				rearRight.set(0.1);
-				rearLeft.set(0.1);
+
 			}
-			else {
-				frontLeft.set(0);
-				frontRight.set(0);
-				rearRight.set(0);
-				rearLeft.set(0);
+
+			else if(m_stick.getRawButton(2)) {
+
 			}
-			if(m_stick.getRawButton(2)) {
-				frontLeft.set(-0.05);
-				frontRight.set(-0.05);
-				rearRight.set(-0.05);
-				rearLeft.set(-0.05);
-			}
-			else {
-				frontLeft.set(0);
-				frontRight.set(0);
-				rearRight.set(0);
-				rearLeft.set(0);
-			}
+
 			SmartDashboard.putNumber("Pulses",encoderFrontLeft.get());
 			// The motors will be updated every 5ms
 			Timer.delay(0.005);
@@ -400,7 +384,7 @@ public class Robot extends SampleRobot {
 		
 		//Resets encoder after running autoDrive
 		encoderFrontLeft.reset();
-		encoderFrontRight.reset();
+		//encoderFrontRight.reset();
 		encoderDistanceLeft = 0;
 		encoderDistanceRight = 0;
 		double turn = -0.5;
