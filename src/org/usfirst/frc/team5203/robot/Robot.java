@@ -40,21 +40,22 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * will be much more difficult under this system. Use IterativeRobot or
  * Command-Based instead if you're new.
  */
+
 public class Robot extends SampleRobot {
-	
-	@SuppressWarnings("deprecation") //CANTalon is depreciated
-	
-	//CANTalon motors "(1,2,3, or 4)" refers to the port on the robot
+	//Talon SRX motors, the number 1,2,3,4, or 5, refer to the id for the motor, given to in in the web based configuration
 	WPI_TalonSRX frontLeft = new WPI_TalonSRX(1);
 	WPI_TalonSRX rearLeft = new WPI_TalonSRX(2);
 	WPI_TalonSRX frontRight = new WPI_TalonSRX(3);
 	WPI_TalonSRX rearRight = new WPI_TalonSRX(4);
+	//The 5th Talon is for the claw
 	WPI_TalonSRX claw = new WPI_TalonSRX(5);
+	//Spark climber = new Spark(Port Number);
+	//Spark climber2 = new Spark(Port Number);
 	//Gyro used for giving direction of the robot, useful for things like turning in autonomous
 	ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 	
 	//Checks if the claw has been opened or not. Used in operater controlled period for opening and closing the claw.
-	boolean clawStatus = true;
+	boolean isClawOpen;
 	
 	//Encoder objects
 	Encoder encoderFrontLeft = new Encoder(0,1,false,Encoder.EncodingType.k4X);
@@ -328,6 +329,7 @@ public class Robot extends SampleRobot {
 		claw.configPeakCurrentLimit(0,1);
 		claw.configPeakCurrentDuration(1,1);
 		claw.configContinuousCurrentLimit(16,1);
+		isClawOpen = true;
 		while (isOperatorControl() && isEnabled()) {
 			/* Drive arcade style
 			*Math.pow refers to the sensitivity of the stick for controlling the motors. The higher the number,
@@ -346,16 +348,18 @@ public class Robot extends SampleRobot {
 
 			}
 			SmartDashboard.putNumber("Pulses",encoderFrontLeft.get());
-			//By pressing the Y button once, it will close the claw motor
-			if(m_stick.getRawButtonPressed(3) && clawStatus) {
-				clawStatus = false;
-				openClaw();
+			//By pressing the X button once, it will close the claw motor
+			if(m_stick.getRawButtonPressed(3)) {
+				closeClaw();
+				System.out.println("Close claw");
 			}
 			//By pressing Y button once again, the claw will open
-			else if(m_stick.getRawButtonPressed(3) && !clawStatus) {
-				closeClaw();
+			else if(m_stick.getRawButtonPressed(4)) {
+				openClaw();
+				System.out.println("Open claw");
 			}
-			else {
+			//By pressing/holding the right bumper (button 6), it will set the claw to 0 power.
+			else if(m_stick.getRawButton(6)){
 				claw.set(0);
 			}
 			//Checks what the voltage of the claw motor is, used for testing the the current limiter
@@ -420,16 +424,18 @@ public class Robot extends SampleRobot {
 	}
 	//A function that first limits the claw motor to 16 amps, and then runs the motor at 100%. Running the motor at 100% will make sure that the motor constantly runs at the 16 amps it is limited to. 16 amps was chosen because it allowed the omotor to put a constant force on the cube without crushing it.
 	public void closeClaw() {
+		System.out.println("I'm at closeClaw");
 		claw.enableCurrentLimit(true);
 		claw.configPeakCurrentLimit(0,1);
 		claw.configPeakCurrentDuration(1,1);
 		claw.configContinuousCurrentLimit(16,1);
-		claw.set(1);
+		claw.set(-1);
 	}
 	//A function that sets the claw motor to run backwards (open the claw) for 1 second, and then set the motor back to 0 power. Timer.delay is used to run the motor for the specified 1 second.
 	public void openClaw() {
-		claw.set(-1);
-		Timer.delay(1);
+		System.out.println("I'm at openClaw");
+		claw.set(1);
+		Timer.delay(0.5);
 		claw.set(0);
 	}
 	/*public void test() {
