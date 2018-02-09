@@ -40,7 +40,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * will be much more difficult under this system. Use IterativeRobot or
  * Command-Based instead if you're new.
  */
-
+@SuppressWarnings("deprecation")
 public class Robot extends SampleRobot {
 	//Talon SRX motors, the number 1,2,3,4, or 5, refer to the id for the motor, given to in in the web based configuration
 	WPI_TalonSRX frontLeft = new WPI_TalonSRX(1);
@@ -326,9 +326,9 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
 		robotDrive.setSafetyEnabled(true);
 		claw.enableCurrentLimit(true);
-		claw.configPeakCurrentLimit(0,1);
+		claw.configPeakCurrentLimit(6,1);
 		claw.configPeakCurrentDuration(1,1);
-		claw.configContinuousCurrentLimit(16,1);
+		claw.configContinuousCurrentLimit(5,1);
 		isClawOpen = true;
 		while (isOperatorControl() && isEnabled()) {
 			/* Drive arcade style
@@ -338,28 +338,24 @@ public class Robot extends SampleRobot {
 			*/
 			
 			//Every time the stick is in neutral position, it resets the motors to zero.
-			robotDrive.arcadeDrive(-Math.pow(m_stick.getY(),3), Math.pow(m_stick.getX(),3));
-			//Uses buttons "A" and "B" to test basic electrical setup on spark controllers
-			if(m_stick.getRawButton(1)) {
-
-			}
-
-			else if(m_stick.getRawButton(2)) {
-
-			}
+			robotDrive.arcadeDrive(-Math.pow(m_stick.getY(),3), Math.pow(m_stick.getX(),3)); 
+	
 			SmartDashboard.putNumber("Pulses",encoderFrontLeft.get());
 			//By pressing the X button once, it will close the claw motor
-			if(m_stick.getRawButtonPressed(3)) {
-				closeClaw();
+			if(m_stick.getRawButton(3)) {
+				claw.set(0.25);
 				System.out.println("Close claw");
 			}
 			//By pressing Y button once again, the claw will open
-			else if(m_stick.getRawButtonPressed(4)) {
+			else if(m_stick.getRawButton(4)) {
 				openClaw();
 				System.out.println("Open claw");
 			}
 			//By pressing/holding the right bumper (button 6), it will set the claw to 0 power.
 			else if(m_stick.getRawButton(6)){
+				claw.set(0);
+			}
+			else {
 				claw.set(0);
 			}
 			//Checks what the voltage of the claw motor is, used for testing the the current limiter
@@ -426,17 +422,287 @@ public class Robot extends SampleRobot {
 	public void closeClaw() {
 		System.out.println("I'm at closeClaw");
 		claw.enableCurrentLimit(true);
-		claw.configPeakCurrentLimit(0,1);
+		claw.configPeakCurrentLimit(6,1);
 		claw.configPeakCurrentDuration(1,1);
-		claw.configContinuousCurrentLimit(16,1);
-		claw.set(-1);
+		claw.configContinuousCurrentLimit(5,1);
+		claw.set(0.1);
 	}
 	//A function that sets the claw motor to run backwards (open the claw) for 1 second, and then set the motor back to 0 power. Timer.delay is used to run the motor for the specified 1 second.
 	public void openClaw() {
+		claw.enableCurrentLimit(true);
+		claw.configPeakCurrentLimit(6,1);
+		claw.configPeakCurrentDuration(1,1);
+		claw.configContinuousCurrentLimit(5,1);
 		System.out.println("I'm at openClaw");
 		claw.set(1);
-		Timer.delay(0.5);
+		Timer.delay(-0.1);
 		claw.set(0);
+	}
+	public void DriveClass() {
+		if(m_stick.getY() < 0.1 && m_stick.getY() >= 0) {
+			frontLeft.set(0);
+		 	frontRight.set(0);
+		 	rearLeft.set(0);
+		 	rearRight.set(0);
+		 }
+		else if(m_stick.getY() <= 0.1 && m_stick.getY() >= 0.2) {
+			frontLeft.set(-0.1);
+			frontRight.set(-0.1);
+		 	rearLeft.set(-0.1);
+			rearRight.set(-0.1);
+		  	}
+		else if(m_stick.getY() <= 0.2 && m_stick.getY() >= 0.3) {
+			frontLeft.set(-0.2);
+		 	frontRight.set(-0.2);
+		  	rearLeft.set(-0.2);
+			rearRight.set(-0.2);
+		  	}
+		else if(m_stick.getY() <= 0.3 && m_stick.getY() >= 0.4) {
+		 	frontLeft.set(-0.3);
+		  	frontRight.set(-0.3);
+		  	rearLeft.set(-0.3);
+		  	rearRight.set(-0.3);
+		  	}
+	 	else if(m_stick.getY() <= 0.4 && m_stick.getY() >= 0.5) {
+		  	frontLeft.set(-0.4);
+			frontRight.set(-0.4);
+			rearLeft.set(-0.4);
+			rearRight.set(-0.4);
+		  	}
+		 else if(m_stick.getY() <= 0.5 && m_stick.getY() >= 0.6) {
+		  	frontLeft.set(-0.5);
+	 		frontRight.set(-0.5);
+			rearLeft.set(-0.5);
+			rearRight.set(-0.5);
+		  	}
+		  else if(m_stick.getY() <= 0.6 && m_stick.getY() >= 0.7) {
+			frontLeft.set(-0.6);
+		 	frontRight.set(-0.6);
+		 	rearLeft.set(-0.6);
+	 		rearRight.set(-0.6);
+		  	}
+		  else if(m_stick.getY() <= 0.7 && m_stick.getY() >= 0.8) {
+		  	frontLeft.set(-0.7);
+		  	frontRight.set(-0.7);
+		  	rearLeft.set(-0.7);
+		  	rearRight.set(-0.7);
+		  	}
+		  else if(m_stick.getY() <= 0.8 && m_stick.getY() >= 0.9) {
+		  	frontLeft.set(-0.8);
+			frontRight.set(-0.8);
+		 	rearLeft.set(-0.8);
+		  	rearRight.set(-0.8);
+		  	}
+		  else if(m_stick.getY() <= 0.9 && m_stick.getY() > 1) {
+		  	frontLeft.set(-0.9);
+			frontRight.set(-0.9);
+		  	rearLeft.set(-0.9);
+			rearRight.set(-0.9);
+		  	}
+		  else if(m_stick.getY() == 1) {
+		  	frontLeft.set(-1);
+		  	frontRight.set(-1);
+		  	rearLeft.set(-1);
+		  	rearRight.set(-1);
+		  	}
+		if(m_stick.getY() < -0.1 && m_stick.getY() >= 0) {
+			frontLeft.set(0);
+		 	frontRight.set(0);
+		 	rearLeft.set(0);
+		 	rearRight.set(0);
+		 }
+		else if(m_stick.getY() <= -0.1 && m_stick.getY() >= -0.2) {
+			frontLeft.set(0.1);
+			frontRight.set(0.1);
+		 	rearLeft.set(0.1);
+			rearRight.set(0.1);
+		  	}
+		else if(m_stick.getY() <= -0.2 && m_stick.getY() >= -0.3) {
+			frontLeft.set(0.2);
+		 	frontRight.set(0.2);
+		  	rearLeft.set(0.2);
+			rearRight.set(0.2);
+		  	}
+		else if(m_stick.getY() <= -0.3 && m_stick.getY() >= -0.4) {
+		 	frontLeft.set(0.3);
+		  	frontRight.set(0.3);
+		  	rearLeft.set(0.3);
+		  	rearRight.set(0.3);
+		  	}
+	 	else if(m_stick.getY() <= -0.4 && m_stick.getY() >= -0.5) {
+		  	frontLeft.set(0.4);
+			frontRight.set(0.4);
+			rearLeft.set(0.4);
+			rearRight.set(0.4);
+		  	}
+		 else if(m_stick.getY() <= -0.5 && m_stick.getY() >= -0.6) {
+		  	frontLeft.set(0.5);
+	 		frontRight.set(0.5);
+			rearLeft.set(0.5);
+			rearRight.set(0.5);
+		  	}
+		  else if(m_stick.getY() <= -0.6 && m_stick.getY() >= -0.7) {
+			frontLeft.set(0.6);
+		 	frontRight.set(0.6);
+		 	rearLeft.set(0.6);
+	 		rearRight.set(0.6);
+		  	}
+		  else if(m_stick.getY() <= -0.7 && m_stick.getY() >= -0.8) {
+		  	frontLeft.set(0.7);
+		  	frontRight.set(0.7);
+		  	rearLeft.set(0.7);
+		  	rearRight.set(0.7);
+		  	}
+		  else if(m_stick.getY() <= -0.8 && m_stick.getY() >= -0.9) {
+		  	frontLeft.set(0.8);
+			frontRight.set(0.8);
+		 	rearLeft.set(0.8);
+		  	rearRight.set(0.8);
+		  	}
+		  else if(m_stick.getY() <= -0.9 && m_stick.getY() > -1) {
+		  	frontLeft.set(0.9);
+			frontRight.set(0.9);
+		  	rearLeft.set(0.9);
+			rearRight.set(0.9);
+		  	}
+		  else if(m_stick.getY() == -1) {
+		  	frontLeft.set(1);
+		  	frontRight.set(1);
+		  	rearLeft.set(1);
+		  	rearRight.set(1);
+		  	}
+		if(m_stick.getX() < -0.1 && m_stick.getX() >= 0) {
+			frontLeft.set(0);
+		 	frontRight.set(0);
+		 	rearLeft.set(0);
+		 	rearRight.set(0);
+		 }
+		else if(m_stick.getX() <= -0.1 && m_stick.getX() >= -0.2) {
+			frontLeft.set(-0.1);
+			frontRight.set(0.1);
+		 	rearLeft.set(-0.1);
+			rearRight.set(0.1);
+		  	}
+		else if(m_stick.getX() <= -0.2 && m_stick.getX() >= -0.3) {
+			frontLeft.set(-0.2);
+		 	frontRight.set(0.2);
+		  	rearLeft.set(-0.2);
+			rearRight.set(0.2);
+		  	}
+		else if(m_stick.getX() <= -0.3 && m_stick.getX() >= -0.4) {
+		 	frontLeft.set(-0.3);
+		  	frontRight.set(0.3);
+		  	rearLeft.set(-0.3);
+		  	rearRight.set(0.3);
+		  	}
+	 	else if(m_stick.getX() <= -0.4 && m_stick.getX() >= -0.5) {
+		  	frontLeft.set(-0.4);
+			frontRight.set(0.4);
+			rearLeft.set(-0.4);
+			rearRight.set(0.4);
+		  	}
+		 else if(m_stick.getX() <= -0.5 && m_stick.getX() >= -0.6) {
+		  	frontLeft.set(-0.5);
+	 		frontRight.set(0.5);
+			rearLeft.set(-0.5);
+			rearRight.set(0.5);
+		  	}
+		  else if(m_stick.getX() <= -0.6 && m_stick.getX() >= -0.7) {
+			frontLeft.set(-0.6);
+		 	frontRight.set(0.6);
+		 	rearLeft.set(-0.6);
+	 		rearRight.set(0.6);
+		  	}
+		  else if(m_stick.getX() <= -0.7 && m_stick.getX() >= -0.8) {
+		  	frontLeft.set(-0.7);
+		  	frontRight.set(0.7);
+		  	rearLeft.set(-0.7);
+		  	rearRight.set(0.7);
+		  	}
+		  else if(m_stick.getX() <= -0.8 && m_stick.getX() >= -0.9) {
+		  	frontLeft.set(-0.8);
+			frontRight.set(0.8);
+		 	rearLeft.set(-0.8);
+		  	rearRight.set(0.8);
+		  	}
+		  else if(m_stick.getX() <= -0.9 && m_stick.getX() > -1) {
+		  	frontLeft.set(-0.9);
+			frontRight.set(0.9);
+		  	rearLeft.set(-0.9);
+			rearRight.set(0.9);
+		  	}
+		  else if(m_stick.getX() == -1) {
+		  	frontLeft.set(-1);
+		  	frontRight.set(1);
+		  	rearLeft.set(-1);
+		  	rearRight.set(1);
+		  	}
+		if(m_stick.getX() < 0.1 && m_stick.getX() >= 0) {
+			frontLeft.set(0);
+		 	frontRight.set(0);
+		 	rearLeft.set(0);
+		 	rearRight.set(0);
+		 }
+		else if(m_stick.getX() <= 0.1 && m_stick.getX() >= 0.2) {
+			frontLeft.set(0.1);
+			frontRight.set(-0.1);
+		 	rearLeft.set(0.1);
+			rearRight.set(-0.1);
+		  	}
+		else if(m_stick.getX() <= 0.2 && m_stick.getX() >= 0.3) {
+			frontLeft.set(0.2);
+		 	frontRight.set(-0.2);
+		  	rearLeft.set(0.2);
+			rearRight.set(-0.2);
+		  	}
+		else if(m_stick.getX() <= 0.3 && m_stick.getX() >= 0.4) {
+		 	frontLeft.set(0.3);
+		  	frontRight.set(-0.3);
+		  	rearLeft.set(0.3);
+		  	rearRight.set(-0.3);
+		  	}
+	 	else if(m_stick.getX() <= 0.4 && m_stick.getX() >= 0.5) {
+		  	frontLeft.set(0.4);
+			frontRight.set(-0.4);
+			rearLeft.set(0.4);
+			rearRight.set(-0.4);
+		  	}
+		 else if(m_stick.getX() <= 0.5 && m_stick.getX() >= 0.6) {
+		  	frontLeft.set(0.5);
+	 		frontRight.set(-0.5);
+			rearLeft.set(0.5);
+			rearRight.set(-0.5);
+		  	}
+		  else if(m_stick.getX() <= 0.6 && m_stick.getX() >= 0.7) {
+			frontLeft.set(0.6);
+		 	frontRight.set(-0.6);
+		 	rearLeft.set(0.6);
+	 		rearRight.set(-0.6);
+		  	}
+		  else if(m_stick.getX() <= 0.7 && m_stick.getX() >= 0.8) {
+		  	frontLeft.set(0.7);
+		  	frontRight.set(-0.7);
+		  	rearLeft.set(0.7);
+		  	rearRight.set(-0.7);
+		  	}
+		  else if(m_stick.getX() <= 0.8 && m_stick.getX() >= 0.9) {
+		  	frontLeft.set(0.8);
+			frontRight.set(-0.8);
+		 	rearLeft.set(0.8);
+		  	rearRight.set(-0.8);
+		  	}
+		  else if(m_stick.getX() <= 0.9 && m_stick.getX() > 1) {
+		  	frontLeft.set(0.9);
+			frontRight.set(-0.9);
+		  	rearLeft.set(0.9);
+			rearRight.set(-0.9);
+		  	}
+		  else if(m_stick.getX() == 1) {
+		  	frontLeft.set(1);
+		  	frontRight.set(-1);
+		  	rearLeft.set(1);
+		  	rearRight.set(-1);
+		  	}
 	}
 	/*public void test() {
 		robotDrive.setSafetyEnabled(false);
