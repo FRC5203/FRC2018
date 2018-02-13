@@ -46,8 +46,8 @@ public class Robot extends SampleRobot {
 	WPI_TalonSRX rearLeft = new WPI_TalonSRX(2);
 	WPI_TalonSRX frontRight = new WPI_TalonSRX(3);
 	WPI_TalonSRX rearRight = new WPI_TalonSRX(4);
-	//The 5th Talon is for the claw
 	WPI_TalonSRX claw = new WPI_TalonSRX(5);
+	//The two  climber motor controllers used to power the winch that raises the robot
 	Spark climber1 = new Spark(0);
 	Spark climber2 = new Spark(1);
 	//Gyro used for giving direction of the robot, useful for things like turning in autonomous
@@ -62,7 +62,7 @@ public class Robot extends SampleRobot {
 	//Units used are inches
 	double kDistPerPulse = 0.0751650586;
 	
-	//Used to control pnuematics
+	//Used to control pnuematics (regulates air allowing the piston for the climber to raise)
 	Solenoid solenoid = new Solenoid(1);
 	
 	//Variables for encoder
@@ -81,7 +81,7 @@ public class Robot extends SampleRobot {
 	//Organizes the motors on each side into groups
 	SpeedControllerGroup leftDrive = new SpeedControllerGroup(frontLeft, rearLeft);
 	SpeedControllerGroup rightDrive = new SpeedControllerGroup(frontRight, rearRight);
-	//DifferentialDrive takes the two groups for the robotDrive, the robotDrive is used later to control the robot's movement
+	//DifferentialDrive takes the two groups for the robotDrive. The robotDrive is used later to control the robot's movement
 	DifferentialDrive robotDrive = new DifferentialDrive(leftDrive, rightDrive);
 	//DefaultAuto and CustomAuto are basic options for autonomous, which will appear on the smart dashboard
 	private static final String kDefaultAuto = "Default Robot Auto";
@@ -92,29 +92,31 @@ public class Robot extends SampleRobot {
 	DriverStation.Alliance color;
 	//Robot position-on-field variable
 	int station;
-	//String telling the robot the locations of the switches
+	//String telling the robot the locations of the switches on field
 	String gameData;
 	
 	
 	//Game controller 
 	private Joystick m_stick = new Joystick(0);
-	
+	//Chooser on the smartdashboard for autonomous modes
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
-
+	
 	public Robot() {
 		robotDrive.setExpiration(0.1);
 	}
-
+	
 	@Override
 	public void robotInit() {
+		//Enables the camera. No other onjects or code is reqiured besides this
 		CameraServer.getInstance().startAutomaticCapture();
+		//Sends "kDefaultAuto", kCustomAuto", and "kCustomAuto2" to the smartdahsboard as chooseable options
 		m_chooser.addDefault("Default Robot Auto", kDefaultAuto);
 		m_chooser.addObject("My Robot Auto", kCustomAuto);
 		m_chooser.addObject("My Second Robot Auto", kCustomAuto2);
 		SmartDashboard.putData("Auto modes", m_chooser);
 		
 	}
-
+	
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
 	 * between different autonomous modes using the dashboard. The sendable
@@ -194,39 +196,42 @@ public class Robot extends SampleRobot {
 		encoderFrontLeft.setSamplesToAverage(10);
 		
 		//Encoder parameters for front right encoder
-	//	encoderFrontRight.setMaxPeriod(.1);
-//		encoderFrontRight.setMinRate(10);
+		//encoderFrontRight.setMaxPeriod(.1);
+		//encoderFrontRight.setMinRate(10);
 		//In inches
-	//	encoderFrontRight.setDistancePerPulse(kDistPerPulse);
-//		encoderFrontRight.setReverseDirection(false);
-//		encoderFrontRight.setSamplesToAverage(7);
+		//encoderFrontRight.setDistancePerPulse(kDistPerPulse);
+		//encoderFrontRight.setReverseDirection(false);
+		//encoderFrontRight.setSamplesToAverage(7);
 		
-		//Random Autos made to test encoders and gyro
+		//A switch that uses the autonomous options on the smartdashboard as cases, depending on what case is chosen, the switch will perform the code written for that case
 		System.out.println("2Auto selected: " + autoSelected);
 		switch (autoSelected) {
+		//An autonomous mode that is used for testing purpouses
 			case kDefaultAuto:
 				climber1.set(1);
 				climber2.set(1);
 				break;
+		//The autonomous mode that is planned to be used for the competition
+		//Gets the team color, station, and switch positions to decide what "if" statement to use
 			case kCustomAuto:
 				if(color == DriverStation.Alliance.Blue && station == 1) {
 					if(gameData.charAt(0) == 'R') {
 						autoDrive(238);
-					//	autoTurn(90);
+						autoTurn(90);
 						autoDrive(40);
-						//drop cube in plate
+						openClaw();
 						autoDrive(-35);
-					//	autoTurn(-90);
+						autoTurn(-90);
 						//autoDrive(unknown);
 						//autoTurn(unknown);
 					}
 					else if(gameData.charAt(0) == 'L') {
 						autoDrive(238);
-					//	autoTurn(90);
+						autoTurn(90);
 						autoDrive(40);
-						//Drop cube in plate
+						openClaw();
 						autoDrive(-35);
-					//	autoTurn(-90);
+						autoTurn(-90);
 						//autoDrive(unknown);
 						//autoTurn(unknown);
 					}
@@ -259,6 +264,7 @@ public class Robot extends SampleRobot {
 				}
 					
 				break;
+		//Another autonomous mode used for testing
 			case kCustomAuto2:
 				System.out.println("In CA2");
 				double speed = 0.05;
@@ -319,28 +325,51 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
 		robotDrive.setSafetyEnabled(true);
+		boolean goingForward = false;
+		boolean goingReverse = false;
 		//sets up current limiting for the claw
 		claw.enableCurrentLimit(true);
 		claw.configPeakCurrentLimit(6,1);
 		claw.configPeakCurrentDuration(1,1);
 		claw.configContinuousCurrentLimit(5,1);
 		while (isOperatorControl() && isEnabled()) {
-			//robotDriveCustom();
-			//Math.pow refers to the sensitivity of the stick for controlling the motors. The higher the number the more you need to move the joystick to reach higher speeds
-			//The second double in Math.pow needs to be odd or the robot will not drive properly
 			
-			//Every time the stick is in neutral position, it resets the motors to zero.
-	/*
-			else if(m_stick.getX() >= 0.8) {
-				robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 5),m_stick.getX() - 0.2);
-			}
-			else if(m_stick.getX() >= -0.8) {
-				robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 5),m_stick.getX() + 0.2);
-				}
-				*/
+			//Because the 2018 robot has problems with slowly turning to one side, we use booleans and "if"  statments to tell it to apply more positive or negative power to the motor controller
+			//By setting the goingForward boolean to true, it tells the code that the robot is going forward, and that it should make the left side motors go faster forwards
+			//By setting the goingReverse boolean to true, it tells the code to make the left side motors to go backwards faster
+			if(m_stick.getY() > 0) {
+				//gets the y-axis and x-axis of the joystick, and applies the output to the motor power.
+				//The Math.pow creates a exponential function using the output from the joystick, and raises it to the power of the second number (3 in this case)
+				//This makes it so that the robot goes much slower when moving the joystick less, but once the joystick is pushed enough in one direction, the speed of the motors ramps up much faster
 				robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 3), Math.pow(m_stick.getX(), 3));
-			robotDriveCustom2();
-			
+				goingForward = true;
+				goingReverse = false;
+			}
+			else if(m_stick.getY() < 0) {
+				robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 3), Math.pow(m_stick.getX(), 3));
+				goingForward = false;
+				goingReverse = true;
+			}
+			if(goingForward == true) {
+				frontRight.set(- 0.05);
+				rearRight.set(- 0.05);
+			}
+			else if(goingReverse == true) {
+				frontRight.set(+ 0.05);
+				rearRight.set(+ 0.05);
+			}
+			else if(goingReverse == false && goingForward == false) {
+				robotDrive.arcadeDrive(0,0);
+			}
+			if(m_stick.getRawButton(12)) {
+				autoTurn(180);
+			}
+			if(m_stick.getRawButton(14)) {
+				autoTurn(-90);
+			}
+			if(m_stick.getRawButton(15)) {
+				autoTurn(90);
+			}
 			SmartDashboard.putNumber("Pulses",encoderFrontLeft.get());
 			//By holding X, the claw will clamp down on the cube
 			if(m_stick.getRawButton(3)) {
@@ -359,7 +388,7 @@ public class Robot extends SampleRobot {
 			else {
 				claw.set(0);
 			}
-			//By pressing the left bumper, the solenoid (valve) allows air to pass to the pnuematics, raising the climber.
+			//By pressing the left bumper, the solenoid allows air to pass to the pnuematics, raising the climber.
 			if(m_stick.getRawButton(7)) {
 				solenoid.set(true);
 			}
@@ -372,9 +401,9 @@ public class Robot extends SampleRobot {
 			Timer.delay(0.005);
 			}
 	}
-
+	
 	/**
-	 * Drives the robot using a single paramenter, distance, and encoders. Capable of moving the robot forwards and back without needing to write arcadeDrive each time.
+	 * Drives the robot using a single paramenter, distance, as well as encoders to track the movement of the robot. Capable of moving the robot forwards and back without needing to write arcadeDrive each time.
 	 * @param distance
 	 */
 	public void autoDrive(double distance) {
@@ -435,7 +464,7 @@ public class Robot extends SampleRobot {
 	}
 	
 	/**
-	 * A function that first limits the claw motor to 5 amps, and then runs the motor at 25%. Running the motor at 100% will make sure that the motor constantly runs at the 16 amps it is limited to. 16 amps was chosen because it allowed the omotor to put a constant force on the cube without crushing it.
+	 * A function that first limits the claw motor to 5 amps, and then runs the motor at 25%.
 	 */
 	public void closeClaw() {
 		System.out.println("I'm at closeClaw");
@@ -458,12 +487,10 @@ public class Robot extends SampleRobot {
 		Timer.delay(0.5);
 		claw.set(0);
 	}
-	/**
-	 * A custom drive class used to drive the robot by using if statments for each movement of the stick.
-	 * By using if statements, it allows you to set the power of the motor for different intervals of movement on the stick.
-	 * Usefull if sensitivity is not customizable enough for 
-	 */
-	public void robotDriveCustom() {
+
+	//A random project currently not being used, but took a lot of time to copy and paste. Use this as a learning example of what not to do when trying to program a robot to move
+	
+	/*public void robotDriveCustom() {
 		System.out.println("I'm using the new drive class");
 		if(Math.abs(m_stick.getY()) < 0.1) {
 			robotDrive.arcadeDrive(0,0);
@@ -598,7 +625,11 @@ public class Robot extends SampleRobot {
 		  	robotDrive.arcadeDrive(0,0.6);
 		  	}
 	}
-public void robotDriveCustom2() {
+	*/
+	
+	//Another project not being used. (keep for later testing and ideas)
+	
+/*public void robotDriveCustom2() {
 	SmartDashboard.putNumber("Magnitude", m_stick.getMagnitude());
 	/*if(m_stick.getY() >= 0) {
 		robotDrive.arcadeDrive(m_stick.getMagnitude(),Math.pow(m_stick.getX(),3));
@@ -606,6 +637,6 @@ public void robotDriveCustom2() {
 	else if(m_stick.getY() < 0) {
 		robotDrive.arcadeDrive(-m_stick.getMagnitude(),m_stick.getX());
 	}
-	*/
-}
+	
+*/
 }
