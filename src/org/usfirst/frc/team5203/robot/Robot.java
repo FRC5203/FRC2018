@@ -5,6 +5,16 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+/* TO DO: 
+ * 
+ * 1. Add deadzone to claw climb
+ * 2. Increase claw climb and claw intake power
+ * 3. Test Gyro
+ * 4. Test encoders and AutoDrive
+ * 5. Test pistons
+ * 6. Test drive.
+ */
+
 package org.usfirst.frc.team5203.robot;
 
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -50,6 +60,8 @@ public class Robot extends SampleRobot {
 	//The two  climber motor controllers used to power the winch that raises the robot
 	Spark climber1 = new Spark(0);
 	Spark climber2 = new Spark(1);
+	Spark intake = new Spark(2);
+	Spark clawClimb = new Spark(3);
 	//Gyro used for giving direction of the robot, useful for things like turning in autonomous
 	ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 	
@@ -73,7 +85,7 @@ public class Robot extends SampleRobot {
 	boolean directionLeft;
 	boolean stoppedLeft;
 	int countRight;
-	double encoderDistanceRight;
+	double encoderDistanceRight;                                                                  
 	double rateRight;
 	boolean directionRight;
 	boolean stoppedRight;
@@ -86,8 +98,10 @@ public class Robot extends SampleRobot {
 	//DefaultAuto and CustomAuto are basic options for autonomous, which will appear on the smart dashboard
 	private static final String kDefaultAuto = "Default Robot Auto";
 	private static final String kCustomAuto = "My Robot Auto";
-	private static final String kCustomAuto2 = "My Second Robot Auto ";
-	
+	private static final String kCustomAuto2 = "Rotation 90 Auto test";
+	private static final String kCustomAuto3 = "Rotation -90 Auto test";
+	private static final String kCustomAuto4 = "Auto test 25 ft";
+	private static final String kCustomAuto5 = "Auto test 1.5 ft";
 	//Alliance color variable
 	DriverStation.Alliance color;
 	//Robot position-on-field variable
@@ -112,7 +126,10 @@ public class Robot extends SampleRobot {
 		//Sends "kDefaultAuto", kCustomAuto", and "kCustomAuto2" to the smartdahsboard as chooseable options
 		m_chooser.addDefault("Default Robot Auto", kDefaultAuto);
 		m_chooser.addObject("My Robot Auto", kCustomAuto);
-		m_chooser.addObject("My Second Robot Auto", kCustomAuto2);
+		m_chooser.addObject("Rotation 90 Auto test", kCustomAuto2);
+		m_chooser.addObject("Rotation -90 Auto test", kCustomAuto3);
+		m_chooser.addObject("Auto test 25 ft", kCustomAuto4);
+		m_chooser.addObject("Auto test 1.5 ft", kCustomAuto5);
 		SmartDashboard.putData("Auto modes", m_chooser);
 		
 	}
@@ -194,7 +211,7 @@ public class Robot extends SampleRobot {
 		encoderFrontLeft.setDistancePerPulse(0.00390625);
 		encoderFrontLeft.setReverseDirection(false);
 		encoderFrontLeft.setSamplesToAverage(10);
-		
+		SmartDashboard.putNumber("Encoder Pulses", encoderFrontLeft.get());
 		//Encoder parameters for front right encoder
 		//encoderFrontRight.setMaxPeriod(.1);
 		//encoderFrontRight.setMinRate(10);
@@ -208,6 +225,7 @@ public class Robot extends SampleRobot {
 		switch (autoSelected) {
 		//An autonomous mode that is used for testing purpouses
 			case kDefaultAuto:
+				System.out.println("I'm in Default Auto!!");
 				climber1.set(1);
 				climber2.set(1);
 				break;
@@ -216,97 +234,137 @@ public class Robot extends SampleRobot {
 			case kCustomAuto:
 				if(color == DriverStation.Alliance.Blue && station == 1) {
 					if(gameData.charAt(0) == 'R') {
-						autoDrive(238);
-						autoTurn(90);
+					 	autoDrive(168);
+					 	autoTurn(90);
+				       	//Turns to left
 						autoDrive(40);
 						openClaw();
 						autoDrive(-35);
-						autoTurn(-90);
-						//autoDrive(unknown);
-						//autoTurn(unknown);
-					}
+				       	autoTurn(-90);
+						//Turns to right
+						autoDrive(47);
+						autoTurn(90);
+						autoDrive(45);
+						autoTurn(90);
+						autoDrive(1);
+						autoDrive(0);
+						autoTurn(0);
+
+						}
 					else if(gameData.charAt(0) == 'L') {
-						autoDrive(238);
+						autoDrive(168);
+					   	autoTurn(90);
+					   	autoDrive(40);
+					   	openClaw();
+					   	autoDrive(-35);
+					   	autoTurn(-90);
+						autoDrive(47);
+						autoTurn(-90);
+						autoDrive(45);
+						autoTurn(-90);
+						autoDrive(1);
+						autoDrive(0);
+						autoTurn(0);
+						}
+					else {
+						robotDrive.arcadeDrive(0,0);
+						}
+
+						}
+				if(color == DriverStation.Alliance.Blue && station == 2) {
+					if(gameData.charAt(0) == 'R') {
+						autoDrive(70);
+						autoTurn(-90);
+						autoDrive(72);
+						autoTurn(90);
+						autoDrive(98);
 						autoTurn(90);
 						autoDrive(40);
 						openClaw();
-						autoDrive(-35);
+						autoDrive(-50);
+						autoTurn(90);
+						autoDrive(47);
+						autoTurn(90);
+						autoDrive(60);
+						autoTurn(90);
+						autoDrive(1);
+						autoTurn(0);
+						autoDrive(0);
+						}
+						else if(gameData.charAt(0) == 'L') {
+						autoDrive(70);
+						autoTurn(90);
+						autoDrive(120);
 						autoTurn(-90);
-						//autoDrive(unknown);
-						//autoTurn(unknown);
-					}
-					else {
-						robotDrive.arcadeDrive(0,0);			
-					}
-				
-				}
-				else if(color == DriverStation.Alliance.Blue && station == 2) {
-					if(gameData.charAt(0) == 'R') {
-						//autoDrive(unknown);
-					}
-					else if(gameData.charAt(0) == 'L') {
-						//autoDrive(unknown);
-					}
-					else {
-						robotDrive.arcadeDrive(0,0);
-					}
-				}
-				else if(color == DriverStation.Alliance.Blue && station == 3) {
-					if(gameData.charAt(0) == 'R') {
-						//autoDrive(unknown);
-					}
-					else if(gameData.charAt(0) == 'L') {
-						//autoDrive(unknown);
-					}
+						autoDrive(98);
+						autoTurn(90);
+						autoDrive(40);
+						openClaw();
+						autoDrive(-50);
+						autoTurn(-90);
+						autoDrive(47);
+						autoTurn(90);
+						autoDrive(60);
+						autoTurn(90);
+						autoDrive(1);
+						autoTurn(0);
+						autoDrive(0);
+						}
 					else {
 						robotDrive.arcadeDrive(0,0);
-					}
-				}
-					
+						}
+						}
+				if(color == DriverStation.Alliance.Blue && station == 3) {
+					if(gameData.charAt(0) == 'R') {
+						autoDrive(229);
+						autoTurn(90);
+						autoDrive(279);
+						autoTurn(90);
+						autoDrive(47);
+						autoTurn(90);
+						autoDrive(40);
+						openClaw();
+						autoDrive(-60);
+						autoTurn(0);
+						autoDrive(0);
+						}
+					else if(gameData.charAt(0) == 'L') {
+						autoDrive(229);
+						autoTurn(-90);
+						autoDrive(279);
+						autoTurn(-90);
+						autoDrive(47);
+						autoTurn(-90);
+						autoDrive(40);
+						openClaw();
+						autoDrive(-60);
+						autoTurn(0);
+						autoDrive(0);
+						}
+					else {
+						robotDrive.arcadeDrive(0,0);
+						}
+						}
 				break;
 		//Another autonomous mode used for testing
 			case kCustomAuto2:
-				System.out.println("In CA2");
-				double speed = 0.05;
-				encoderFrontLeft.reset();
-				SmartDashboard.putNumber("Testliness", 330);
-				while(-encoderFrontLeft.get() < 1792) {
-					encoderFrontLeft.get();
-					SmartDashboard.putNumber("EncPulses", -encoderFrontLeft.get());
-					frontLeft.set(speed);
-					frontRight.set(speed);
-					rearLeft.set(speed);
-					rearRight.set(speed);
-					
-					}
-				speed = -0.05;
-				encoderFrontLeft.reset();
-				while(-encoderFrontLeft.get() > -512) {
-					encoderFrontLeft.get();
-					SmartDashboard.putNumber("EncPulses", -encoderFrontLeft.get());
-					frontLeft.set(speed);
-					frontRight.set(speed);
-					rearLeft.set(speed);
-					rearRight.set(speed);
-				}
-				Timer.delay(2);
-				speed = 0.05;
-				encoderFrontLeft.reset();
-				while(-encoderFrontLeft.get() < 1024) {
-					encoderFrontLeft.get();
-					SmartDashboard.putNumber("EncPulses",  -encoderFrontLeft.get());
-					frontLeft.set(speed);
-					frontRight.set(speed);
-					rearLeft.set(speed);
-					rearRight.set(speed);
-					}
-				speed = 0;
-				frontLeft.set(speed);
-				frontRight.set(speed);
-				rearLeft.set(speed);
-				rearRight.set(speed);
+				System.out.println("Autonomous that turns 90 activated!");
+				autoTurn(90);
+				break;
+			case kCustomAuto3:
+				System.out.println("Autonomous that turns -90 activated!");
+				autoTurn(-90);
+				break;
+			case kCustomAuto4:
+				System.out.println("Autonomous that moves 300 activated!");
+				autoDrive(300);
+				break;
+			case kCustomAuto5:
+				System.out.println("Autonomous that moves 18 activated!");
+				autoDrive(18);
 				break;
 		}
+				 
 	}
 
 	/**
@@ -324,20 +382,26 @@ public class Robot extends SampleRobot {
 	 */
 	@Override
 	public void operatorControl() {
-		robotDrive.setSafetyEnabled(true);
-		boolean goingForward = false;
-		boolean goingReverse = false;
+		robotDrive.setSafetyEnabled(false);
+		//boolean goingForward = false;
+		//boolean goingReverse = false;
 		//sets up current limiting for the claw
 		claw.enableCurrentLimit(true);
 		claw.configPeakCurrentLimit(6,1);
 		claw.configPeakCurrentDuration(1,1);
 		claw.configContinuousCurrentLimit(5,1);
+		//gyro.reset();
 		while (isOperatorControl() && isEnabled()) {
-			
+			SmartDashboard.putNumber("Gyro",gyro.getAngle());
+			if(m_stick.getRawButton(8)) {
+			gyro.reset();
+		}
+			customDrive();
+			//robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 3), Math.pow(m_stick.getX(),3));
 			//Because the 2018 robot has problems with slowly turning to one side, we use booleans and "if"  statments to tell it to apply more positive or negative power to the motor controller
 			//By setting the goingForward boolean to true, it tells the code that the robot is going forward, and that it should make the left side motors go faster forwards
 			//By setting the goingReverse boolean to true, it tells the code to make the left side motors to go backwards faster
-			if(m_stick.getY() > 0) {
+		/*	if(m_stick.getY() > 0) {
 				//gets the y-axis and x-axis of the joystick, and applies the output to the motor power.
 				//The Math.pow creates a exponential function using the output from the joystick, and raises it to the power of the second number (3 in this case)
 				//This makes it so that the robot goes much slower when moving the joystick less, but once the joystick is pushed enough in one direction, the speed of the motors ramps up much faster
@@ -350,7 +414,11 @@ public class Robot extends SampleRobot {
 				goingForward = false;
 				goingReverse = true;
 			}
-			if(goingForward == true) {
+			else if(m_stick.getY() == 0) {
+				goingForward = false;
+				goingReverse = false;
+			}
+			if(goingForward == true && goingReverse == false) {
 				frontRight.set(- 0.05);
 				rearRight.set(- 0.05);
 			}
@@ -361,7 +429,8 @@ public class Robot extends SampleRobot {
 			else if(goingReverse == false && goingForward == false) {
 				robotDrive.arcadeDrive(0,0);
 			}
-			if(m_stick.getRawButton(12)) {
+			*/
+			/*if(m_stick.getRawButton(12)) {
 				autoTurn(180);
 			}
 			if(m_stick.getRawButton(14)) {
@@ -370,26 +439,39 @@ public class Robot extends SampleRobot {
 			if(m_stick.getRawButton(15)) {
 				autoTurn(90);
 			}
+			*/
+			if(m_stick.getRawButton(5)) {
+				intake.set(0.5);
+			}
+			else if(m_stick.getRawButton(6)) {
+				intake.set(-0.5);
+			}
+			else {
+				intake.set(0);
+			}
+			if(m_stick.getRawAxis(5) > 0) {
+				clawClimb.set(0.2);
+			}
+			else if(m_stick.getRawAxis(5) < 0) {
+				clawClimb.set(-0.2);
+			}
+			else {
+				clawClimb.set(0);
+			}
 			SmartDashboard.putNumber("Pulses",encoderFrontLeft.get());
 			//By holding X, the claw will clamp down on the cube
-			if(m_stick.getRawButton(3)) {
+			if(m_stick.getRawAxis(3) > 0.1) {
 				closeClaw();
-				System.out.println("Close claw");
 			}
 			//By pressing Y, the claw will open
-			else if(m_stick.getRawButton(4)) {
+			else if(m_stick.getRawAxis(2) > 0.1) {
 				openClaw();
-				System.out.println("Open claw");
-			}
-			//By pressing  the right bumper (button 6), it will set the claw to 0 power. Only useful for testing the claw motor.
-			else if(m_stick.getRawButton(6)){
-				claw.set(0);
 			}
 			else {
 				claw.set(0);
 			}
 			//By pressing the left bumper, the solenoid allows air to pass to the pnuematics, raising the climber.
-			if(m_stick.getRawButton(7)) {
+			if(m_stick.getRawButton(9)) {
 				solenoid.set(true);
 			}
 			else {
@@ -411,7 +493,7 @@ public class Robot extends SampleRobot {
 		//The distance and pulses for the encoder, displayed on the smartdashboard
 		//Every 489 pulses, there is one rotation. Gear is 5 inches
 		SmartDashboard.putNumber("Pulses",countLeft);
-		SmartDashboard.putNumber("Inches", distance);
+		SmartDashboard.putNumber("Inches", encoderDistanceLeft);
 		//Resets encoder after running autoDrive
 		encoderFrontLeft.reset();
 		//encoderFrontRight.reset();
@@ -423,13 +505,13 @@ public class Robot extends SampleRobot {
 			if(distance - encoderDistanceLeft <= 24){
 				speed = 0.3;
 			}
-			frontLeft.set(speed);
-			frontRight.set(speed * 0.90);
-			rearRight.set(speed * 0.90);
-			rearLeft.set(speed);
+			frontLeft.set(-speed * 0.98);
+			frontRight.set(speed);
+			rearRight.set(speed);
+			rearLeft.set(-speed * 0.98);
 			//Variables for front left encoder
 			countLeft = encoderFrontLeft.get();
-			encoderDistanceLeft = encoderFrontLeft.getDistance();
+			encoderDistanceLeft = -encoderFrontLeft.getDistance();
 			rateLeft = encoderFrontLeft.getRate();
 			directionLeft = encoderFrontLeft.getDirection();
 			stoppedLeft = encoderFrontLeft.getStopped();
@@ -449,19 +531,34 @@ public class Robot extends SampleRobot {
 		//encoderFrontRight.reset();
 		encoderDistanceLeft = 0;
 		encoderDistanceRight = 0;
+		gyro.reset();
 		double turn = -0.5;
-		while(angle > -gyro.getAngle()) {	
+		if(angle > 0) {
+		while(angle >= -gyro.getAngle()) {	
 			//tests if the angle left for the robot to turn is within 20 degress. If so, it slows the robot
 			if(angle - gyro.getAngle() <= 20) {
 				turn = -0.2;
 			}
 			robotDrive.arcadeDrive(0,turn);
 			SmartDashboard.putNumber("Gyro",-gyro.getAngle());
-			Timer.delay(0.005);
+			//Timer.delay(0.005);
+			}
 		}
+		else if(angle < 0) {
+		while(-angle >= gyro.getAngle()) {	
+			//tests if the angle left for the robot to turn is within 20 degress. If so, it slows the robot
+			if(-angle + gyro.getAngle() <= 20) {
+				turn = -0.2;
+			}
+			robotDrive.arcadeDrive(0,-turn);
+			SmartDashboard.putNumber("Gyro", gyro.getAngle());
+			//Timer.delay(0.005);
+			}
+		}
+		SmartDashboard.putNumber("Gyro",-gyro.getAngle());
 		robotDrive.arcadeDrive(0,0);
-		
-	}
+		}
+	
 	
 	/**
 	 * A function that first limits the claw motor to 5 amps, and then runs the motor at 25%.
@@ -484,8 +581,6 @@ public class Robot extends SampleRobot {
 		claw.configContinuousCurrentLimit(5,1);
 		System.out.println("I'm at openClaw");
 		claw.set(-0.25);
-		Timer.delay(0.5);
-		claw.set(0);
 	}
 
 	//A random project currently not being used, but took a lot of time to copy and paste. Use this as a learning example of what not to do when trying to program a robot to move
@@ -639,4 +734,46 @@ public class Robot extends SampleRobot {
 	}
 	
 */
+public void customDrive() {
+//Dedicated variables for the x and y axis are used just to make coding faster
+	double yIn = m_stick.getY();
+	double xIn = m_stick.getX();
+	double speedLeft = 0;
+	double speedRight = 0;
+	if(xIn == 0 && yIn > 0.3) {
+		speedLeft = yIn - 0.05;
+		speedRight = yIn;
+		frontLeft.set(speedLeft);
+		rearLeft.set(speedLeft);
+		frontRight.set(speedRight);
+		rearRight.set(speedRight);
+	}
+	else if(xIn == 0 && yIn < 0.3 && yIn > 0) {
+		speedLeft = yIn;
+		speedRight = yIn;
+		frontLeft.set(speedLeft);
+		rearLeft.set(speedLeft);
+		frontRight.set(speedRight);
+		rearRight.set(speedRight);
+	}
+	else if(xIn == 0 && yIn < -0.3) {
+		speedLeft = yIn - 0.05;
+		speedRight = yIn;
+		frontLeft.set(speedLeft);
+		rearLeft.set(speedLeft);
+		frontRight.set(speedRight);
+		rearRight.set(speedRight);
+	}
+	else if(xIn == 0 && yIn < 0 && yIn > -0.3) {
+		speedLeft = yIn;
+		speedRight = yIn;
+		frontLeft.set(speedLeft);
+		rearLeft.set(speedLeft);
+		frontRight.set(speedRight);
+		rearRight.set(speedRight);
+	}
+	else {
+		robotDrive.arcadeDrive(Math.pow(yIn,3), Math.pow(xIn,3));
+	}
+}
 }
