@@ -5,16 +5,6 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-/* TO DO: 
- * 
- * 1. Add deadzone to claw climb
- * 2. Increase claw climb and claw intake power
- * 3. Test Gyro
- * 4. Test encoders and AutoDrive
- * 5. Test pistons
- * 6. Test drive.
- */
-
 package org.usfirst.frc.team5203.robot;
 
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -64,19 +54,15 @@ public class Robot extends SampleRobot {
 	Spark clawClimb = new Spark(3);
 	//Gyro used for giving direction of the robot, useful for things like turning in autonomous
 	ADXRS450_Gyro gyro = new ADXRS450_Gyro();
-	
 	//Encoder objects
 	Encoder encoderFrontLeft = new Encoder(0,1,false,Encoder.EncodingType.k4X);
 	//Encoder encoderFrontRight = new Encoder(0,1,false,Encoder.EncodingType.k4X);
-	 
 	//Distance per pulse for the encoder
 	//For reference, the encoder being used for 2018 have 256 pulses per revolution
 	//Units used are inches
 	double kDistPerPulse = 0.0751650586;
-	
 	//Used to control pnuematics (regulates air allowing the piston for the climber to raise)
 	Solenoid solenoid = new Solenoid(1);
-	
 	//Variables for encoder
 	//count gets pulses
 	int countLeft;
@@ -89,7 +75,6 @@ public class Robot extends SampleRobot {
 	double rateRight;
 	boolean directionRight;
 	boolean stoppedRight;
-	
 	//Organizes the motors on each side into groups
 	SpeedControllerGroup leftDrive = new SpeedControllerGroup(frontLeft, rearLeft);
 	SpeedControllerGroup rightDrive = new SpeedControllerGroup(frontRight, rearRight);
@@ -108,7 +93,6 @@ public class Robot extends SampleRobot {
 	int station;
 	//String telling the robot the locations of the switches on field
 	String gameData;
-	
 	
 	//Game controller 
 	private Joystick m_stick = new Joystick(0);
@@ -131,9 +115,7 @@ public class Robot extends SampleRobot {
 		m_chooser.addObject("Auto test 25 ft", kCustomAuto4);
 		m_chooser.addObject("Auto test 1.5 ft", kCustomAuto5);
 		SmartDashboard.putData("Auto modes", m_chooser);
-		
 	}
-	
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
 	 * between different autonomous modes using the dashboard. The sendable
@@ -234,10 +216,15 @@ public class Robot extends SampleRobot {
 			case kCustomAuto:
 				if(color == DriverStation.Alliance.Blue && station == 1) {
 					if(gameData.charAt(0) == 'R') {
+						closeClaw();
 					 	autoDrive(168);
 					 	autoTurn(90);
 				       	//Turns to left
 						autoDrive(40);
+						clawClimb.set(0.5);
+						Timer.delay(3);
+						intake.set(0.5);
+						Timer.delay(2);
 						openClaw();
 						autoDrive(-35);
 				       	autoTurn(-90);
@@ -252,9 +239,14 @@ public class Robot extends SampleRobot {
 
 						}
 					else if(gameData.charAt(0) == 'L') {
+						closeClaw();
 						autoDrive(168);
 					   	autoTurn(90);
 					   	autoDrive(40);
+						clawClimb.set(0.5);
+						Timer.delay(3);
+						intake.set(0.5);
+						Timer.delay(2);
 					   	openClaw();
 					   	autoDrive(-35);
 					   	autoTurn(-90);
@@ -273,6 +265,7 @@ public class Robot extends SampleRobot {
 						}
 				if(color == DriverStation.Alliance.Blue && station == 2) {
 					if(gameData.charAt(0) == 'R') {
+						closeClaw();
 						autoDrive(70);
 						autoTurn(-90);
 						autoDrive(72);
@@ -280,6 +273,10 @@ public class Robot extends SampleRobot {
 						autoDrive(98);
 						autoTurn(90);
 						autoDrive(40);
+						clawClimb.set(0.5);
+						Timer.delay(3);
+						intake.set(0.5);
+						Timer.delay(2);
 						openClaw();
 						autoDrive(-50);
 						autoTurn(90);
@@ -292,6 +289,7 @@ public class Robot extends SampleRobot {
 						autoDrive(0);
 						}
 						else if(gameData.charAt(0) == 'L') {
+						closeClaw();
 						autoDrive(70);
 						autoTurn(90);
 						autoDrive(120);
@@ -299,6 +297,10 @@ public class Robot extends SampleRobot {
 						autoDrive(98);
 						autoTurn(90);
 						autoDrive(40);
+						clawClimb.set(0.5);
+						Timer.delay(3);
+						intake.set(0.5);
+						Timer.delay(2);
 						openClaw();
 						autoDrive(-50);
 						autoTurn(-90);
@@ -316,6 +318,7 @@ public class Robot extends SampleRobot {
 						}
 				if(color == DriverStation.Alliance.Blue && station == 3) {
 					if(gameData.charAt(0) == 'R') {
+						closeClaw();
 						autoDrive(229);
 						autoTurn(90);
 						autoDrive(279);
@@ -323,12 +326,17 @@ public class Robot extends SampleRobot {
 						autoDrive(47);
 						autoTurn(90);
 						autoDrive(40);
+						clawClimb.set(0.5);
+						Timer.delay(3);
+						intake.set(0.5);
+						Timer.delay(2);
 						openClaw();
 						autoDrive(-60);
 						autoTurn(0);
 						autoDrive(0);
 						}
 					else if(gameData.charAt(0) == 'L') {
+						closeClaw();
 						autoDrive(229);
 						autoTurn(-90);
 						autoDrive(279);
@@ -336,6 +344,10 @@ public class Robot extends SampleRobot {
 						autoDrive(47);
 						autoTurn(-90);
 						autoDrive(40);
+						clawClimb.set(0.5);
+						Timer.delay(3);
+						intake.set(0.5);
+						Timer.delay(2);
 						openClaw();
 						autoDrive(-60);
 						autoTurn(0);
@@ -349,11 +361,11 @@ public class Robot extends SampleRobot {
 		//Another autonomous mode used for testing
 			case kCustomAuto2:
 				System.out.println("Autonomous that turns 90 activated!");
-				autoTurn(90);
+				autoTurn(65);
 				break;
 			case kCustomAuto3:
 				System.out.println("Autonomous that turns -90 activated!");
-				autoTurn(-90);
+				autoTurn(-65);
 				break;
 			case kCustomAuto4:
 				System.out.println("Autonomous that moves 300 activated!");
@@ -383,77 +395,34 @@ public class Robot extends SampleRobot {
 	@Override
 	public void operatorControl() {
 		robotDrive.setSafetyEnabled(false);
-		//boolean goingForward = false;
-		//boolean goingReverse = false;
-		//sets up current limiting for the claw
 		claw.enableCurrentLimit(true);
 		claw.configPeakCurrentLimit(6,1);
 		claw.configPeakCurrentDuration(1,1);
 		claw.configContinuousCurrentLimit(5,1);
-		//gyro.reset();
+		gyro.reset();
 		while (isOperatorControl() && isEnabled()) {
 			SmartDashboard.putNumber("Gyro",gyro.getAngle());
 			if(m_stick.getRawButton(8)) {
 			gyro.reset();
-		}
-			customDrive();
-			//robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 3), Math.pow(m_stick.getX(),3));
-			//Because the 2018 robot has problems with slowly turning to one side, we use booleans and "if"  statments to tell it to apply more positive or negative power to the motor controller
-			//By setting the goingForward boolean to true, it tells the code that the robot is going forward, and that it should make the left side motors go faster forwards
-			//By setting the goingReverse boolean to true, it tells the code to make the left side motors to go backwards faster
-		/*	if(m_stick.getY() > 0) {
-				//gets the y-axis and x-axis of the joystick, and applies the output to the motor power.
-				//The Math.pow creates a exponential function using the output from the joystick, and raises it to the power of the second number (3 in this case)
-				//This makes it so that the robot goes much slower when moving the joystick less, but once the joystick is pushed enough in one direction, the speed of the motors ramps up much faster
-				robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 3), Math.pow(m_stick.getX(), 3));
-				goingForward = true;
-				goingReverse = false;
 			}
-			else if(m_stick.getY() < 0) {
-				robotDrive.arcadeDrive(Math.pow(m_stick.getY(), 3), Math.pow(m_stick.getX(), 3));
-				goingForward = false;
-				goingReverse = true;
+			double yIn = m_stick.getY();
+			double xIn = m_stick.getX();
+			robotDrive.arcadeDrive(Math.pow(yIn,3),Math.pow(xIn,3));
+			
+			if(m_stick.getRawButton(6)) {
+				intake.set(1);
 			}
-			else if(m_stick.getY() == 0) {
-				goingForward = false;
-				goingReverse = false;
-			}
-			if(goingForward == true && goingReverse == false) {
-				frontRight.set(- 0.05);
-				rearRight.set(- 0.05);
-			}
-			else if(goingReverse == true) {
-				frontRight.set(+ 0.05);
-				rearRight.set(+ 0.05);
-			}
-			else if(goingReverse == false && goingForward == false) {
-				robotDrive.arcadeDrive(0,0);
-			}
-			*/
-			/*if(m_stick.getRawButton(12)) {
-				autoTurn(180);
-			}
-			if(m_stick.getRawButton(14)) {
-				autoTurn(-90);
-			}
-			if(m_stick.getRawButton(15)) {
-				autoTurn(90);
-			}
-			*/
-			if(m_stick.getRawButton(5)) {
-				intake.set(0.5);
-			}
-			else if(m_stick.getRawButton(6)) {
-				intake.set(-0.5);
+			else if(m_stick.getRawButton(5)) {
+				intake.set(-1);
 			}
 			else {
 				intake.set(0);
 			}
-			if(m_stick.getRawAxis(5) > 0) {
-				clawClimb.set(0.2);
+			if(m_stick.getRawAxis(5) > 0.1) {
+				clawClimb.set(0.8);
 			}
-			else if(m_stick.getRawAxis(5) < 0) {
-				clawClimb.set(-0.2);
+			else if(m_stick.getRawAxis(5) < -0.1) {
+				clawClimb.set(-0.8);
 			}
 			else {
 				clawClimb.set(0);
@@ -482,7 +451,7 @@ public class Robot extends SampleRobot {
 			// The motors will be updated every 5ms
 			Timer.delay(0.005);
 			}
-	}
+		}
 	
 	/**
 	 * Drives the robot using a single paramenter, distance, as well as encoders to track the movement of the robot. Capable of moving the robot forwards and back without needing to write arcadeDrive each time.
@@ -505,6 +474,7 @@ public class Robot extends SampleRobot {
 			if(distance - encoderDistanceLeft <= 24){
 				speed = 0.3;
 			}
+			//Multiplies speed by 0.98 to lower the speed of the left motors
 			frontLeft.set(-speed * 0.98);
 			frontRight.set(speed);
 			rearRight.set(speed);
@@ -525,7 +495,6 @@ public class Robot extends SampleRobot {
 	 * @param angle
 	 */
 	public void autoTurn(double angle) {
-		
 		//Resets encoder after running autoDrive
 		encoderFrontLeft.reset();
 		//encoderFrontRight.reset();
@@ -541,6 +510,7 @@ public class Robot extends SampleRobot {
 			}
 			robotDrive.arcadeDrive(0,turn);
 			SmartDashboard.putNumber("Gyro",-gyro.getAngle());
+			SmartDashboard.putNumber("Pulses",countLeft);
 			//Timer.delay(0.005);
 			}
 		}
@@ -552,14 +522,14 @@ public class Robot extends SampleRobot {
 			}
 			robotDrive.arcadeDrive(0,-turn);
 			SmartDashboard.putNumber("Gyro", gyro.getAngle());
+			SmartDashboard.putNumber("Pulses",countLeft);
 			//Timer.delay(0.005);
 			}
 		}
 		SmartDashboard.putNumber("Gyro",-gyro.getAngle());
+		SmartDashboard.putNumber("Pulses",countLeft);
 		robotDrive.arcadeDrive(0,0);
 		}
-	
-	
 	/**
 	 * A function that first limits the claw motor to 5 amps, and then runs the motor at 25%.
 	 */
@@ -582,198 +552,54 @@ public class Robot extends SampleRobot {
 		System.out.println("I'm at openClaw");
 		claw.set(-0.25);
 	}
-
-	//A random project currently not being used, but took a lot of time to copy and paste. Use this as a learning example of what not to do when trying to program a robot to move
-	
-	/*public void robotDriveCustom() {
-		System.out.println("I'm using the new drive class");
-		if(Math.abs(m_stick.getY()) < 0.1) {
-			robotDrive.arcadeDrive(0,0);
-		 }
-		else if(m_stick.getY() <= 0.1 && m_stick.getY() >= 0.2) {
-			robotDrive.arcadeDrive(0.1,0);
+	/** A function used for driving the robot with the controller. Uses arcade drive, but has programming that slows down the left side motors, due to the right side going slower.
+	 * <blockquote> <p>Note: Only slows left side motors when the robot is driving straight forward or backward
+	 * <p>
+	 */
+	public void customDrive() {
+		//Dedicated variables for the x and y axis are used just to make coding faster
+		double yIn = m_stick.getY();
+		double xIn = m_stick.getX();
+		double speedLeft = 0;
+		double speedRight = 0;
+		//if the jostick is pushed more than 0.3, then lower the speed of the left side motors by 0.05
+		if(xIn > -0.1 && xIn < 0.1 && yIn > 0.3) {
+			speedLeft = yIn;
+			speedRight = yIn - 0.05;
+			frontLeft.set(speedLeft);
+			rearLeft.set(speedLeft);
+			frontRight.set(speedRight);
+			rearRight.set(speedRight);
 		}
-		else if(m_stick.getY() <= 0.2 && m_stick.getY() >= 0.3) {
-			robotDrive.arcadeDrive(0.2,0);
-			}
-		else if(m_stick.getY() <= 0.3 && m_stick.getY() >= 0.4) {
-		 	robotDrive.arcadeDrive(0.3,0);
-		  	}
-	 	else if(m_stick.getY() <= 0.4 && m_stick.getY() >= 0.5) {
-		  	robotDrive.arcadeDrive(0.4,0);
-		  	}
-		else if(m_stick.getY() <= 0.5 && m_stick.getY() >= 0.6) {
-		  	robotDrive.arcadeDrive(0.5,0);
-		  	}
-		else if(m_stick.getY() <= 0.6 && m_stick.getY() >= 0.7) {
-			robotDrive.arcadeDrive(0.6,0);
-		  	}
-		else if(m_stick.getY() <= 0.7 && m_stick.getY() >= 0.8) {
-		  	robotDrive.arcadeDrive(0.7,0);
-		  	}
-		else if(m_stick.getY() <= 0.8 && m_stick.getY() >= 0.9) {
-		  	robotDrive.arcadeDrive(0.7,0);
-		  	}
-		else if(m_stick.getY() <= 0.9 && m_stick.getY() > 1) {
-		  	robotDrive.arcadeDrive(0.9,0);
-		  	}
-		else if(m_stick.getY() == 1) {
-		  	robotDrive.arcadeDrive(1,0);
-		  	}
-		else if(m_stick.getY() < -0.1 && m_stick.getY() >= 0) {
-			robotDrive.arcadeDrive(0,0);
-		 }
-		else if(m_stick.getY() <= -0.1 && m_stick.getY() >= -0.2) {
-			robotDrive.arcadeDrive(-0.1,0);
-		  	}
-		else if(m_stick.getY() <= -0.2 && m_stick.getY() >= -0.3) {
-			robotDrive.arcadeDrive(-0.2,0);
-		  	}
-		else if(m_stick.getY() <= -0.3 && m_stick.getY() >= -0.4) {
-			robotDrive.arcadeDrive(-0.3,0);
-		  	}
-	 	else if(m_stick.getY() <= -0.4 && m_stick.getY() >= -0.5) {
-			robotDrive.arcadeDrive(-0.4,0);
-		  	}
-		else if(m_stick.getY() <= -0.5 && m_stick.getY() >= -0.6) {
-		  	robotDrive.arcadeDrive(-0.5,0);
-		  	}
-		else if(m_stick.getY() <= -0.6 && m_stick.getY() >= -0.7) {
-				robotDrive.arcadeDrive(-0.6,0);
-		  	}
-	 	else if(m_stick.getY() <= -0.7 && m_stick.getY() >= -0.8) {
-		  	robotDrive.arcadeDrive(-0.7,0);
-		  	}
-		else if(m_stick.getY() <= -0.8 && m_stick.getY() >= -0.9) {
-		  		robotDrive.arcadeDrive(-0.8,0);
-		  	}
-		else if(m_stick.getY() <= -0.9 && m_stick.getY() > -1) {
-		  		robotDrive.arcadeDrive(-0.9,0);
-		  	}
-		else if(m_stick.getY() == -1) {
-		  		robotDrive.arcadeDrive(-1,0);
-		  	}
-		else if(Math.abs(m_stick.getX()) < 0.1) {
-				robotDrive.arcadeDrive(0,0);
-		 }
-		else if(m_stick.getX() <= -0.1 && m_stick.getX() >= -0.2) {
-				robotDrive.arcadeDrive(0,-0.1);
-		  	}
-		else if(m_stick.getX() <= -0.2 && m_stick.getX() >= -0.3) {
-			robotDrive.arcadeDrive(0,-0.2);
-		  	}
-		else if(m_stick.getX() <= -0.3 && m_stick.getX() >= -0.4) {
-		 	robotDrive.arcadeDrive(0,-0.3);
-		  	}
-	 	else if(m_stick.getX() <= -0.4 && m_stick.getX() >= -0.5) {
-		  	robotDrive.arcadeDrive(0,-0.4);
-		  	}
-		else if(m_stick.getX() <= -0.5 && m_stick.getX() >= -0.6) {
-		  	robotDrive.arcadeDrive(0,-0.5);
-		  	}
-		else if(m_stick.getX() <= -0.6 && m_stick.getX() >= -0.7) {
-			robotDrive.arcadeDrive(0,-0.6);
-		  	}
-	 	else if(m_stick.getX() <= -0.7 && m_stick.getX() >= -0.8) {
-		  	robotDrive.arcadeDrive(0,-0.6);
-		  	}
-		else if(m_stick.getX() <= -0.8 && m_stick.getX() >= -0.9) {
-		  	robotDrive.arcadeDrive(0,-0.6);
-		  	}
-		else if(m_stick.getX() <= -0.9 && m_stick.getX() > -1) {
-		  	robotDrive.arcadeDrive(0,-0.6);
-		  	}
-		else if(m_stick.getX() == -1) {
-		  	robotDrive.arcadeDrive(0,-0.6);
-		  	}
-		else if(m_stick.getX() < 0.1 && m_stick.getX() >= 0) {
-			robotDrive.arcadeDrive(0,0);
-		 }
-		else if(m_stick.getX() <= 0.1 && m_stick.getX() >= 0.2) {
-			robotDrive.arcadeDrive(0,0.1);
-		  	}
-		else if(m_stick.getX() <= 0.2 && m_stick.getX() >= 0.3) {
-			robotDrive.arcadeDrive(0,0.2);
-		  	}
-		else if(m_stick.getX() <= 0.3 && m_stick.getX() >= 0.4) {
-		 	robotDrive.arcadeDrive(0,0.3);
-		  	}
-	 	else if(m_stick.getX() <= 0.4 && m_stick.getX() >= 0.5) {
-		  	robotDrive.arcadeDrive(0,0.4);
-		  	}
-	 	else if(m_stick.getX() <= 0.5 && m_stick.getX() >= 0.6) {
-		  	robotDrive.arcadeDrive(0,0.5);
-		  	}
-	  	else if(m_stick.getX() <= 0.6 && m_stick.getX() >= 0.7) {
-			robotDrive.arcadeDrive(0,0.6);
-		  	}
-		else if(m_stick.getX() <= 0.7 && m_stick.getX() >= 0.8) {
-		  	robotDrive.arcadeDrive(0,0.6);
-		  	}
-		else if(m_stick.getX() <= 0.8 && m_stick.getX() >= 0.9) {
-		  	robotDrive.arcadeDrive(0,0.6);
-		  	}
-		else if(m_stick.getX() <= 0.9 && m_stick.getX() > 1) {
-		  	robotDrive.arcadeDrive(0,0.6);
-		  	}
-		else if(m_stick.getX() == 1) {
-		  	robotDrive.arcadeDrive(0,0.6);
-		  	}
+		//else if the joystick is pushed slightly (between 0.1 and 0.3), then do not lower the motor speed
+		else if(xIn > -0.1 && xIn < 0.1 && yIn < 0.3 && yIn > 0.1) {
+			speedLeft = yIn;
+			speedRight = yIn;
+			frontLeft.set(speedLeft);
+			rearLeft.set(speedLeft);
+			frontRight.set(speedRight);
+			rearRight.set(speedRight);
+		}
+		//Same coding as earlier, but for reversing the robot
+		else if(xIn > -0.1 && xIn < 0.1 && yIn < -0.3) {
+			speedLeft = yIn;
+			speedRight = yIn - 0.05;
+			frontLeft.set(speedLeft);
+			rearLeft.set(speedLeft);
+			frontRight.set(speedRight);
+			rearRight.set(speedRight);
+		}
+		else if(xIn > -0.1 && xIn < 0.1 && yIn < 0 && yIn > -0.3) {
+			speedLeft = yIn;
+			speedRight = yIn;
+			frontLeft.set(speedLeft);
+			rearLeft.set(speedLeft);
+			frontRight.set(speedRight);
+			rearRight.set(speedRight);
+		}
+		//else, use arcade drive when the input on the joystick is anything else besides straight up or down
+		else {
+			robotDrive.arcadeDrive(Math.pow(yIn,3), Math.pow(xIn,3));
+		}
 	}
-	*/
-	
-	//Another project not being used. (keep for later testing and ideas)
-	
-/*public void robotDriveCustom2() {
-	SmartDashboard.putNumber("Magnitude", m_stick.getMagnitude());
-	/*if(m_stick.getY() >= 0) {
-		robotDrive.arcadeDrive(m_stick.getMagnitude(),Math.pow(m_stick.getX(),3));
-	}
-	else if(m_stick.getY() < 0) {
-		robotDrive.arcadeDrive(-m_stick.getMagnitude(),m_stick.getX());
-	}
-	
-*/
-public void customDrive() {
-//Dedicated variables for the x and y axis are used just to make coding faster
-	double yIn = m_stick.getY();
-	double xIn = m_stick.getX();
-	double speedLeft = 0;
-	double speedRight = 0;
-	if(xIn == 0 && yIn > 0.3) {
-		speedLeft = yIn - 0.05;
-		speedRight = yIn;
-		frontLeft.set(speedLeft);
-		rearLeft.set(speedLeft);
-		frontRight.set(speedRight);
-		rearRight.set(speedRight);
-	}
-	else if(xIn == 0 && yIn < 0.3 && yIn > 0) {
-		speedLeft = yIn;
-		speedRight = yIn;
-		frontLeft.set(speedLeft);
-		rearLeft.set(speedLeft);
-		frontRight.set(speedRight);
-		rearRight.set(speedRight);
-	}
-	else if(xIn == 0 && yIn < -0.3) {
-		speedLeft = yIn - 0.05;
-		speedRight = yIn;
-		frontLeft.set(speedLeft);
-		rearLeft.set(speedLeft);
-		frontRight.set(speedRight);
-		rearRight.set(speedRight);
-	}
-	else if(xIn == 0 && yIn < 0 && yIn > -0.3) {
-		speedLeft = yIn;
-		speedRight = yIn;
-		frontLeft.set(speedLeft);
-		rearLeft.set(speedLeft);
-		frontRight.set(speedRight);
-		rearRight.set(speedRight);
-	}
-	else {
-		robotDrive.arcadeDrive(Math.pow(yIn,3), Math.pow(xIn,3));
-	}
-}
 }
